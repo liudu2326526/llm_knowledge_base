@@ -1,0 +1,4 @@
+# 服务器 python 版本 3.7
+pyspark==3.4.0
+bert4vec==0.3.0
+pymilvus==2.1.3
