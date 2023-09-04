@@ -13,9 +13,17 @@ COLLECTION_NAME = 'test_db_' + MODEL_TYPE.replace('-', '_')
 spark = SparkSession.builder.appName("SparkSQLDemo").getOrCreate()
 
 # 创建一个 DataFrame
-data = [("Alice", "teststset"), ("Bob", "dsdfsfsdfd"), ("Charlie", "dsfdsfsf"), ("David", "gfsgrsg")]
+data = [("Alice", "teststset"), ("Bob", "dsdfsfsdfd"), ("Charlie", "dsfdsfsf"),
+        ("David", "gfsgrsg")]
 columns = ["Name", "content"]
-df = spark.createDataFrame(data, columns)
+
+# df = spark.createDataFrame(data, columns)
+df = spark.sql(
+  """
+SELECT dwd_content_id AS name,content FROM prod_dws.dws_main_content_wide_dt_ctime_daily_inc_30d
+WHERE dt = '2023-08-01'
+LIMIT 1000
+  """)
 
 rdd = df.rdd
 
