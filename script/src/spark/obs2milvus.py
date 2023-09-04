@@ -25,7 +25,7 @@ WHERE dt = '2023-08-01'
 LIMIT 1000
   """)
 
-rdd = df.rdd
+rdd = df.rdd.repartition(6)
 
 
 def multiply_partition(iterator):
