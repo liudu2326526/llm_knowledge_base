@@ -37,7 +37,7 @@ def multiply_partition(iterator):
   for name, content in iterator:
     vec = model.encode(content, batch_size=DIMENSION, convert_to_numpy=True,
                        normalize_to_unit=False)
-    content_sub = (content[:198] + '..') if len(content) > 200 else content
+    content_sub = (content[:199]) if len(content) > 200 else content
     ins = [[name], [content_sub], [vec]]
     collection.insert(ins)
 
