@@ -1,5 +1,7 @@
 from bert4vec import Bert4Vec
 from pyspark.sql import SparkSession
+import logging
+
 
 DIMENSION = 768  # Embeddings size
 COUNT = 100  # How many titles to embed and insert.
@@ -35,11 +37,16 @@ def multiply_partition(iterator):
   collection = Collection(name=COLLECTION_NAME)
   collection.load()
   for name, content in iterator:
-    vec = model.encode(content, batch_size=DIMENSION, convert_to_numpy=True,
-                       normalize_to_unit=False)
-    content_sub = str((content[:199]) if len(content) > 200 else content)
-    ins = [[name], [content_sub], [vec]]
-    collection.insert(ins)
+    try:
+      vec = model.encode(content, batch_size=DIMENSION, convert_to_numpy=True,
+                         normalize_to_unit=False)
+      content_sub = str((content[:199]) if len(content) > 200 else content)
+      ins = [[name], [content_sub], [vec]]
+      collection.insert(ins)
+    except Exception as e:
+      logging.error(f'数据写入失败: {e}')
+      logging.error(f'{name}:{content}')
+
 
 
 # 使用 mapPartitions 进行转换操作
