@@ -27,7 +27,7 @@ from prod_dws.dws_base_content_detail_dt_ctime_daily_inc
 where dt = '2023-08-13'
 and length(content) > 5
 and interact_cnt > 0
-limit 100000
+limit 10000
   """)
 
 rdd = df.rdd.repartition(6)
