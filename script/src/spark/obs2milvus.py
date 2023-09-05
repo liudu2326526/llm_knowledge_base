@@ -22,9 +22,12 @@ columns = ["Name", "content"]
 # df = spark.createDataFrame(data, columns)
 df = spark.sql(
   """
-SELECT dwd_content_id AS name,content FROM prod_dws.dws_main_content_wide_dt_ctime_daily_inc_30d
-WHERE dt = '2023-08-01'
-LIMIT 1000
+SELECT dwd_content_id AS name,content 
+from prod_dws.dws_base_content_detail_dt_ctime_daily_inc  
+where dt = '2023-08-13'
+and length(content) > 5
+and interact_cnt > 0
+limit 100000
   """)
 
 rdd = df.rdd.repartition(6)
