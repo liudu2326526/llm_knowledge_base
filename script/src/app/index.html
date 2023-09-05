@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Search Results</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th, td {
+      border: 1px solid black;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+<h1>Search Results</h1>
+<input type="text" id="searchInput" placeholder="Search...">
+<button onclick="search()">Search</button>
+
+<table>
+  <tr>
+    <th>ID</th>
+    <th>Score</th>
+    <th>Title</th>
+  </tr>
+  <tbody id="resultsTableBody"></tbody>
+</table>
+
+<script>
+  function search() {
+    const searchText = document.getElementById('searchInput').value;
+    const apiUrl = `http://127.0.0.1:5000/search?query=${encodeURIComponent(searchText)}`;
+
+    fetch(apiUrl)
+    .then(response => response.json())
+    .then(data => {
+      const resultsTableBody = document.getElementById('resultsTableBody');
+      resultsTableBody.innerHTML = '';
+
+      data.results.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+                        <td>${item[0]}</td>
+                        <td>${item[1]}</td>
+                        <td>${item[2]}</td>
+                    `;
+        resultsTableBody.appendChild(row);
+      });
+    })
+    .catch(error => {
+      console.error('Error fetching data:', error);
+    });
+  }
+</script>
+</body>
+</html>
