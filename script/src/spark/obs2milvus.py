@@ -47,8 +47,6 @@ df = spark.sql(
   group by
     dwd_content_id) a
     JOIN prod_dim.dim_source b on a.source = b.source
-  limit
-    1000
     """)
 
 rdd = df.rdd.repartition(6)
