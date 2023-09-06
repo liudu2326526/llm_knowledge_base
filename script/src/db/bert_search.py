@@ -22,7 +22,7 @@ def search(text):
       data=[bert_doc2vec.embed(text)],  # Embeded search value
       anns_field="embedding",  # Search across embeddings
       param=search_params,
-      limit=5,  # Limit to five results per search
+      limit=10,  # Limit to five results per search
       output_fields=['title']  # Include title field in result
   )
 

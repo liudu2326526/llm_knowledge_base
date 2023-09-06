@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>Search Results</title>
+  <meta charset="UTF-8">
   <style>
     table {
       border-collapse: collapse;
@@ -17,13 +18,41 @@
     th {
       background-color: #f2f2f2;
     }
+    .centered-container {
+      text-align: center; /* 水平居中文本 */
+      display: flex;
+      flex-direction: column; /* 垂直居中元素 */
+      justify-content: center; /* 垂直居中元素 */
+      align-items: center; /* 水平居中元素 */
+      height: 30vh; /* 设置容器的高度为视窗高度，以确保垂直居中 */
+    }
+
+    /* 标题的样式 */
+    h1 {
+      font-family: Arial, sans-serif; /* 使用 Arial 字体，如果没有则使用 sans-serif 作为备用字体 */
+      font-weight: bold; /* 设置为粗体字 */
+      background: linear-gradient(to right, black, blue); /* 文本渐变从左到右由绿色到蓝色 */
+      -webkit-background-clip: text; /* 兼容性样式设置，适用于某些浏览器 */
+      background-clip: text; /* 文本背景裁剪为文本内容 */
+      color: transparent; /* 文本颜色透明 */
+      font-size: 48px; /* 设置字体大小 */
+      -webkit-text-fill-color: transparent; /* 兼容性样式设置，适用于某些浏览器 */
+      text-fill-color: transparent; /* 设置渐变的文本颜色透明 */
+    }
+
+    /* 输入框的样式 */
+    #searchInput {
+      padding: 10px;
+      width: 200px;
+      margin-top: 20px; /* 设置输入框与标题之间的垂直间距 */
+    }
   </style>
 </head>
 <body>
-<h1>Search Results</h1>
-<input type="text" id="searchInput" placeholder="Search...">
-<button onclick="search()">Search</button>
-
+<div class="centered-container">
+  <h1>LLM 知识库</h1>
+  <input type="text" id="searchInput" placeholder="Search..." onkeydown="handleKeyPress(event)">
+</div>
 <table>
   <tr>
     <th>ID</th>
@@ -34,6 +63,14 @@
 </table>
 
 <script>
+  // 处理回车键事件
+  function handleKeyPress(event) {
+    if (event.key === "Enter") {
+      // 在这里执行搜索操作，例如调用 search() 函数
+      search();
+    }
+  }
+
   function search() {
     const searchText = document.getElementById('searchInput').value;
     const apiUrl = `http://127.0.0.1:5000/search?query=${encodeURIComponent(searchText)}`;
@@ -44,7 +81,7 @@
       const resultsTableBody = document.getElementById('resultsTableBody');
       resultsTableBody.innerHTML = '';
 
-      data.results.forEach(item => {
+      data.results.reverse().forEach(item => {
         const row = document.createElement('tr');
         row.innerHTML = `
                         <td>${item[0]}</td>
