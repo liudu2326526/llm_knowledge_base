@@ -26,6 +26,7 @@ df = spark.sql(
     a.content, 
     a.brand_name,
     a.category_name,
+    a.dimensions,
     b.name source_name
   from
     (SELECT
@@ -33,14 +34,16 @@ df = spark.sql(
     MAX(content) content ,
     MAX(source) source,
     concat_ws(',', collect_set(brand_name)) brand_name,
-    concat_ws(',', collect_set(category_name)) category_name
+    concat_ws(',', collect_set(category_name)) category_name,
+  concat_ws(',', collect_set(element))  dimensions
   from
     prod_dws.dws_main_content_wide_dt_ctime_daily_inc_30d
+	LATERAL VIEW explode(concat(dimensions_first,dimensions_second,dimensions_third,dimensions_fourth)) a AS element
   where
     dt = '2023-08-13'
     and length(content) > 5
     and interact_cnt > 0
-    and category_name = '纯牛奶'
+    and category_name in ('纯牛奶','羽毛球')
   group by
     dwd_content_id) a
     JOIN prod_dim.dim_source b on a.source = b.source
@@ -57,11 +60,12 @@ def multiply_partition(iterator):
   connections.connect("default", host=MILVUS_HOST, port="19530")
   collection = Collection(name=COLLECTION_NAME)
   collection.load()
-  for name, content, brand_name, category_name, source_name in iterator:
+  for name, content, brand_name, category_name, dimensions, source_name in iterator:
     try:
-      vec = model.encode(content + brand_name + category_name + source_name,
-                         batch_size=DIMENSION, convert_to_numpy=True,
-                         normalize_to_unit=False)
+      vec = model.encode(
+        content + brand_name + category_name + dimensions + source_name,
+        batch_size=DIMENSION, convert_to_numpy=True,
+        normalize_to_unit=False)
       content_sub = str((content[:199]) if len(content) > 200 else content)
       ins = [[name], [content_sub], [vec]]
       collection.insert(ins)
