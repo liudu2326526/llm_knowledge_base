@@ -50,6 +50,7 @@ FROM
 where
   label = '0'
   and score > 0.95
+limit 1000
     """)
 
 rdd = df.rdd.repartition(6)
