@@ -13,10 +13,6 @@ COLLECTION_NAME = 'test_db_' + MODEL_TYPE.replace('-', '_')
 # 创建 SparkSession
 spark = SparkSession.builder.appName("SparkSQLDemo").getOrCreate()
 
-# 创建一个 DataFrame
-data = [("Alice", "teststset"), ("Bob", "dsdfsfsdfd"), ("Charlie", "dsfdsfsf"),
-        ("David", "gfsgrsg")]
-columns = ["Name", "content"]
 
 # df = spark.createDataFrame(data, columns)
 df = spark.sql(
@@ -73,7 +69,7 @@ def multiply_partition(iterator):
 
 
 # 使用 mapPartitions 进行转换操作
-result_rdd = rdd.foreachPartition(multiply_partition)
+result_rdd = rdd.mapPartitions(multiply_partition)
 
 # 关闭 SparkSession
 spark.stop()
