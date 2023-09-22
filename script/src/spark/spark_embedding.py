@@ -17,14 +17,17 @@ source_map = {
 }
 
 
-def multiply_partition(iterator):
+def multiply_partition(index, iterator):
   model = Bert4Vec(mode=MODEL_TYPE)
+  num = 0
   for dwd_content_id, source, text, content_clean, brandName, className in iterator:
     try:
       process_content = f'{source_map[source]}平台的文案，来自{className}行业的{brandName}品牌营销内容：{content_clean}'
       vec = model.encode(process_content,
                          batch_size=DIMENSION, convert_to_numpy=True,
                          normalize_to_unit=False)
+      num = num + 1
+      logging.info(f'{index} 分区完成向量化数量: {num}')
       yield (dwd_content_id, source, text, content_clean, brandName, className,
              vec.tolist())
     except Exception as e:
@@ -50,7 +53,7 @@ FROM
 where
   label = '0'
   and score > 0.95
-limit 1000
+-- limit 1000
     """)
 
 rdd = df.rdd.repartition(6)
@@ -58,7 +61,7 @@ rdd = df.rdd.repartition(6)
 schema = df.schema
 
 # 使用 mapPartitions 进行转换操作
-result_rdd = rdd.mapPartitions(multiply_partition)
+result_rdd = rdd.mapPartitionsWithIndex(multiply_partition)
 
 result_df = spark.createDataFrame(result_rdd, schema.add(
     StructField("embedding", ArrayType(DoubleType()), True)))
