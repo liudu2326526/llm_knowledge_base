@@ -75,7 +75,7 @@
 
   function search() {
     const searchText = document.getElementById('searchInput').value;
-    const apiUrl = `http://127.0.0.1:5001/search?query=${encodeURIComponent(searchText)}`;
+    const apiUrl = `http://172.16.5.106:5001/search?query=${encodeURIComponent(searchText)}`;
 
     fetch(apiUrl)
     .then(response => response.json())
