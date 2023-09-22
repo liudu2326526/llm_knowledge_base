@@ -5,12 +5,12 @@ MILVUS_HOST = '172.16.5.106'  # Milvus server URI
 MILVUS_PORT = '19530'
 MODEL_TYPE = 'roformer-sim-base'
 # MODEL_TYPE = 'simbert-base'
-COLLECTION_NAME = 'test_db_' + MODEL_TYPE.replace('-', '_')
-
+COLLECTION_NAME = 'pangu_data_' + MODEL_TYPE.replace('-', '_')
 
 connections.connect("default", host=MILVUS_HOST, port=MILVUS_PORT)
 collection = Collection(name=COLLECTION_NAME)
 collection.load()
+
 
 def search(text):
   # Search parameters for the index
@@ -23,13 +23,13 @@ def search(text):
       anns_field="embedding",  # Search across embeddings
       param=search_params,
       limit=10,  # Limit to five results per search
-      output_fields=['title']  # Include title field in result
+      output_fields=['title', 'content']  # Include title field in result
   )
 
   ret = []
   for hit in results[0]:
     row = []
-    row.extend([hit.id, hit.score, hit.entity.get(
-        'title')])  # Get the id, distance, and title for the results
+    row.extend(
+        [hit.id, hit.score, hit.entity.get('title'), hit.entity.get('content')])
     ret.append(row)
   return ret
