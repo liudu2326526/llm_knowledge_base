@@ -8,68 +8,44 @@ MILVUS_HOST = '172.16.5.106'  # Milvus server URI
 MILVUS_PORT = '19530'
 MODEL_TYPE = 'roformer-sim-base'
 # MODEL_TYPE = 'simbert-base'
-COLLECTION_NAME = 'test_db_' + MODEL_TYPE.replace('-', '_')
+COLLECTION_NAME = 'pangu_data_' + MODEL_TYPE.replace('-', '_')
 
 # 创建 SparkSession
 spark = SparkSession.builder.appName("SparkSQLDemo").getOrCreate()
 
-
-# df = spark.createDataFrame(data, columns)
 df = spark.sql(
     """
-  SELECT
-    a.dwd_content_id AS name,
-    a.content, 
-    a.brand_name,
-    a.category_name,
-    a.dimensions,
-    b.name source_name
-  from
-    (SELECT
-    dwd_content_id,
-    MAX(content) content ,
-    MAX(source) source,
-    concat_ws(',', collect_set(brand_name)) brand_name,
-    concat_ws(',', collect_set(category_name)) category_name,
-  concat_ws(',', collect_set(element))  dimensions
-  from
-    prod_dws.dws_main_content_wide_dt_ctime_daily_inc_30d
-	LATERAL VIEW explode(concat(dimensions_first,dimensions_second,dimensions_third,dimensions_fourth)) a AS element
-  where
-    dt = '2023-08-13'
-    and length(content) > 5
-    and interact_cnt > 0
-    and category_name in ('纯牛奶','羽毛球')
-  group by
-    dwd_content_id) a
-    JOIN prod_dim.dim_source b on a.source = b.source
+select
+  id,
+  title,
+  content_clean,
+  embedding
+from
+  prod_mlm.dws_pangu_conv_assessment_embedding_dataset_ss 
     """)
 
 rdd = df.rdd.repartition(6)
 
 
 def multiply_partition(iterator):
-  model = Bert4Vec(mode=MODEL_TYPE)
   from pymilvus import connections, Collection
   connections.connect("default", host=MILVUS_HOST, port="19530")
   collection = Collection(name=COLLECTION_NAME)
   collection.load()
-  for name, content, brand_name, category_name, dimensions, source_name in iterator:
+  for id, title, content_clean, embedding in iterator:
     try:
-      vec = model.encode(
-        content + brand_name + category_name + dimensions + source_name,
-        batch_size=DIMENSION, convert_to_numpy=True,
-        normalize_to_unit=False)
-      content_sub = str((content[:199]) if len(content) > 200 else content)
-      ins = [[name], [content_sub], [vec]]
+      content_sub = str(
+        (content_clean[:499]) if len(content_clean) > 500 else content_clean)
+      title_sub = str((title[:199]) if len(title) > 200 else title)
+      ins = [[id], [title_sub], [content_sub], [embedding]]
       collection.insert(ins)
     except Exception as e:
       logging.error(f'数据写入失败: {e}')
-      logging.error(f'{name}:{content}')
+      logging.error(f'{id}:{content_clean}')
 
 
 # 使用 mapPartitions 进行转换操作
-result_rdd = rdd.mapPartitions(multiply_partition)
+result_rdd = rdd.foreachPartition(multiply_partition)
 
 # 关闭 SparkSession
 spark.stop()
