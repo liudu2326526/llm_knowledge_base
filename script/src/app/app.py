@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from db import bert_search
+from milvus_db import bert_search
 
 app = Flask(__name__)
 CORS(app)  # 允许所有域名的请求
