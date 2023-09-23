@@ -83,7 +83,7 @@
       const resultsTableBody = document.getElementById('resultsTableBody');
       resultsTableBody.innerHTML = '';
 
-      data.results.reverse().forEach(item => {
+      data.results.forEach(item => {
         const row = document.createElement('tr');
         row.innerHTML = `
                         <td>${item[0]}</td>
